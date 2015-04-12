@@ -1,0 +1,130 @@
+dijkstra(Vertex, Ss):-
+  create(Vertex, [Vertex], Ds),
+  dijkstra_1(Ds, [s(Vertex,0,[])], Ss).
+
+dijkstra_1([], Ss, Ss).
+dijkstra_1([D|Ds], Ss0, Ss):-
+  best(Ds, D, S),
+  delete([D|Ds], [S], Ds1),
+  S=s(Vertex,Distance,Path),
+  reverse([Vertex|Path], Path1),
+  merge(Ss0, [s(Vertex,Distance,Path1)], Ss1),
+  create(Vertex, [Vertex|Path], Ds2),
+  delete(Ds2, Ss1, Ds3),
+  incr(Ds3, Distance, Ds4),
+  merge(Ds1, Ds4, Ds5),
+  dijkstra_1(Ds5, Ss1, Ss).
+
+path(Vertex0, Vertex, Path, Dist):-
+  dijkstra(Vertex0, Ss),
+  member(s(Vertex,Dist,Path), Ss), !.
+
+create(Start, Path, Edges):-
+  setof(s(Vertex,Edge,Path), e(Start,Vertex,Edge), Edges), !.
+create(_, _, []).
+
+best([], Best, Best).
+best([Edge|Edges], Best0, Best):-
+  shorter(Edge, Best0), !,
+  best(Edges, Edge, Best).
+best([_|Edges], Best0, Best):-
+  best(Edges, Best0, Best).
+
+shorter(s(_,X,_), s(_,Y,_)):-X < Y.
+
+delete([], _, []).
+delete([X|Xs], [], [X|Xs]):-!.
+delete([X|Xs], [Y|Ys], Ds):-
+  eq(X, Y), !,
+  delete(Xs, Ys, Ds).
+delete([X|Xs], [Y|Ys], [X|Ds]):-
+  lt(X, Y), !, delete(Xs, [Y|Ys], Ds).
+delete([X|Xs], [_|Ys], Ds):-
+  delete([X|Xs], Ys, Ds).
+
+merge([], Ys, Ys).
+merge([X|Xs], [], [X|Xs]):-!.
+merge([X|Xs], [Y|Ys], [X|Zs]):-
+  eq(X, Y), shorter(X, Y), !,
+  merge(Xs, Ys, Zs).
+merge([X|Xs], [Y|Ys], [Y|Zs]):-
+  eq(X, Y), !,
+  merge(Xs, Ys, Zs).
+merge([X|Xs], [Y|Ys], [X|Zs]):-
+  lt(X, Y), !,
+  merge(Xs, [Y|Ys], Zs).
+merge([X|Xs], [Y|Ys], [Y|Zs]):-
+  merge([X|Xs], Ys, Zs).
+
+eq(s(X,_,_), s(X,_,_)).
+
+lt(s(X,_,_), s(Y,_,_)):-X @< Y.
+
+incr([], _, []).
+incr([s(V,D1,P)|Xs], Incr, [s(V,D2,P)|Ys]):-
+  D2 is D1 + Incr,
+  incr(Xs, Incr, Ys).
+
+e(X, Y, Z):-dist(X, Y, Z).
+e(X, Y, Z):-dist(Y, X, Z).
+
+dist(v1,   v2,   115).
+dist(v1,   v3,   142).
+dist(v4,   v5,   114).
+dist(v4,   v6,   108).
+dist(v4,   v7,   100).
+dist(v4,   v8,   154).
+dist(v4,   v9,   154).
+dist(v4,   v10, 75).
+dist(v5,   v11, 86).
+dist(v5,   v12, 97).
+dist(v5,   v6,   100).
+dist(v5,   v7,    99).
+dist(v5,   v13,  80).
+dist(v5,   v8,    48).
+dist(v5,   v14,  63).
+dist(v5,   v9,    75).
+dist(v5,   v10,  125).
+dist(v15, v11,  136).
+dist(v15, v16,  81).
+dist(v15, v14,  96).
+dist(v15, v17,  49).
+dist(v15, v18,  52).
+dist(v11, v24,  76).
+dist(v11, v14,  71).
+dist(v11, v17,  97).
+dist(v11, v10,  89).
+dist(v11, v18,  116).
+dist(v12,  v8,   82).
+dist(v12,  v14, 80).
+dist(v12,  v18, 54).
+dist(v6,  v10,   45).
+dist(v19, v2,    93).
+dist(v19, v3,    94).
+dist(v19, v20,  117).
+dist(v19, v7,    118).
+dist(v19, v13,  120).
+dist(v19, v21,  58).
+dist(v19, v22,  112).
+dist(v16, v18,  71).
+dist(v2,   v3,    44).
+dist(v2,   v21,  104).
+dist(v24, v25,  112).
+dist(v24, v17,  126).
+dist(v3,   v21,  148).
+dist(v26, v20,  58).
+dist(v26, v8,    90).
+dist(v26, v9,    65).
+dist(v26, v22,  37).
+dist(v20, v13,  41).
+dist(v20, v21,  89).
+dist(v20, v9,    34).
+dist(v20, v22,  23).
+dist(v7,   v13,  35).
+dist(v7,   v8,    100).
+dist(v7,   v9,    70).
+dist(v13, v21,  130).
+dist(v13, v9,    38).
+dist(v21, v22,  80).
+dist(v8,   v9,    38).
+dist(v14, v18,  57).
