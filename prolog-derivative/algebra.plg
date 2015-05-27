@@ -85,10 +85,14 @@ show(bin(Op, X, Y)) :- priority(Op, N), show_op2(X, N), write(Op), show_op2(Y, N
 
 derivative(num(X), num(0)).
 
-derivative(bin('^', id(X), id(X)), bin('*', bin('^', id(X), id(X)), bin('+', un('exp', id(X), num(1))))).
+derivative(bin('^', id(X), id(X)), bin('*', bin('^', id(X), id(X)), bin('+', un('log ', id(X)), num(1)))).
 
 derivative(bin('^', id(U), num(X)), bin('*', num(X), Y)) :-
 	Y = bin('^', id(U), num(X-1)).
+
+derivative(bin('^', F, G), bin('+', bin('*', bin('*', G, bin('^', F, bin('-', G, num(1)))), F1), bin('*', bin('*', bin('^', F, G), un('ln', F)), G1))) :-
+    derivative(F, F1),
+    derivative(G, G1).
 
 derivative(un('-', X), un('-', X1)) :-
 	derivative(X, X1).
@@ -112,24 +116,25 @@ derivative(bin('/', U, V), bin('/', Up, Down)) :-
 	Down = bin('^', V, num(2)).
 
 % +/-
-derivative(bin(OP, U, V), bin(OP, X, Y)) :-
+derivative(bin('+', U, V), bin('+', X, Y)) :-
+	derivative(U, X),
+	derivative(V, Y).
+
+derivative(bin('-', U, V), bin('-', X, Y)) :-
 	derivative(U, X),
 	derivative(V, Y).
 
 derivative(id(X), num(1)).
 
+% derivative()
+
+	% write('('),
+	% show(Tree),
+	% write(')\' = '),
 :- initialization(start).
 start :- (parse(Tree) -> (
-	simplify(Tree, Simple),
-	derivative(Simple, Dx),
-	simplify(Dx, SDx),
+	derivative(Tree, Dx),
 	draw(Tree),
-	draw(Simple),
 	draw(Dx),
-	write('('),
-	show(Simple),
-	write(')\' = '),
-	show(Dx),
-	write(' = '),
-	show(SDx))
+	show(Dx))
   ; write('Syntax error!')), !.
