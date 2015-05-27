@@ -2,7 +2,7 @@ module Main where
 
 import SimpleQueue
 import TwoListQueue
--- import BalancedTwoListQueue
+import BalancedTwoListQueue
 import Queue
 import System.CPUTime
 
@@ -21,4 +21,4 @@ test v = do
 main = do
     test (SimpleQueue [])
     test (TwoListQueue [] [])
-    -- test (BalancedTwoListQueue [] [] 0 0)
+    test (BalancedTwoListQueue [] [] 0 0)
